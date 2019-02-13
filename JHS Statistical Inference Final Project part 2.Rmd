@@ -1,0 +1,105 @@
+---
+title: "JHS statistical inference final project Part 2"
+author: "Yuncheng Yang"
+date: "13 February 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Part 2 Basic Inferential Data Analysis
+This part we are going to apply basic exploratory data analysis and use statistical inference
+
+### Loading and obtaining a basic idea of data
+```{r, echo=TRUE}
+
+data("ToothGrowth")
+str(ToothGrowth)
+
+```
+The data is about 2 types of supplement OJ and VC has different effecet under dose of 0.5, 1.0, 2.0
+
+Now we use plots to explore more details
+```{r, echo=TRUE}
+library(ggplot2)
+g3<-ggplot(data = ToothGrowth, aes(x=dose, y=len, color=supp))+geom_point()
+g3
+```
+we can see both supplements appeared to be more effective with increase of dose
+
+Now we explore the trends
+
+```{r, echo=TRUE}
+g3+geom_smooth(method = "lm")
+```
+
+The effectiveness of VC seems more correlated to dose, now use statistical inference to explore the difference 
+### Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose
+To prove the assumption that the effectiveness of VC seems more correlated to dose, we need a series of data analysis
+#### Analysis between supps
+```{r, echo=TRUE}
+lenoj<-subset(ToothGrowth, supp=='OJ', select = 'len')
+lenvc<-subset(ToothGrowth, supp=='VC', select = 'len')
+
+t.test(lenoj, lenvc)
+```
+
+p value is 0.06 >0.05, hence two supp does not have sigificant difference on improving tooth growth overall
+
+#### Analysis between different dose
+Because of the uphill trend we observed, we gonna compare dose at 2.0 and dose at 0.5
+
+```{r, echo=TRUE}
+len0.5<-subset(ToothGrowth, dose==0.5, select = 'len')
+len2.0<-subset(ToothGrowth, dose==2.0, select = 'len')
+
+t.test(len2.0$len, len0.5$len,paired = T)
+```
+p value is small, hence dose at 2.0 is significantly more effective then dose at 0.5
+
+
+
+#### Analysis between dose with in supp group
+First we are going to analyse the difference of dose within each supp
+We are going to determine if there is a siginificant difference between higher dose 2.0 and lower dose 0.5
+```{r, echo=TRUE}
+###statistical test for the supp oj
+
+len2.0oj<-ToothGrowth[ToothGrowth$dose==2.0&ToothGrowth$supp=='OJ',1]
+len0.5oj<-ToothGrowth[ToothGrowth$dose==0.5&ToothGrowth$supp=='OJ',1]
+t.test(len2.0oj,len0.5oj, paired = T)
+```
+
+The mean difference is significant with small p value, hence higher dose of OJ supp improve teeth growth
+
+
+Now we apply the similar procedure on VC group
+```{r, echo=TRUE}
+###statistical test for the supp vc
+
+len2.0vc<-ToothGrowth[ToothGrowth$dose==2.0&ToothGrowth$supp=='VC',1]
+len0.5vc<-ToothGrowth[ToothGrowth$dose==0.5&ToothGrowth$supp=='VC',1]
+t.test(len2.0vc,len0.5vc, paired = T)
+```
+
+The mean of difference is 18.16, and p value is very small, hence we can conclude higher dose of VC improves tooth growth
+
+
+
+## Conclusion
+Two supplements both showed correlation between tooth growth and dose of supp, with no overall significant difference between 2 supp. However, the difference between higher and lower dose of VC appeared to be larger than the difference between higher and lower dose of OJ
+
+
+
+
+
+
+
+
+
+
+
+
+

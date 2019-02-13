@@ -1,0 +1,68 @@
+---
+title: "JHS statistical inference final project Part 1"
+author: Yuncheng YANG
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Simulation Exercise
+This exercise will simulate random exponetial distribution of 1000 trials with sample size of 40 
+The mean and variance of sample will be used to explore central limited theorm
+
+### Show the sample mean and compare it to the theoretical mean of the distribution
+Accroding to the central limit therom, the mean of sample mean distribution can estimate the population mean
+Here, we set population mean should be in 95% condifence level of sample mean distribution
+```{r, echo=FALSE} 
+lambda<-0.2
+#simulating 1000 trials,sample size of 40
+n=40
+rows=1000
+sim<-rexp(n*1000, lambda)
+##calculating sample means 
+sim1<-matrix(sim,rows)
+smean1<-rowMeans(sim1)
+hist(smean1)
+```
+Now use ggplot2 package to explore and visualize the data better and show approximately normal distribution
+```{r, echo=FALSE}
+library(ggplot2)
+smean1<-data.frame(smean1)
+g<-ggplot(smean1, aes(x=smean1))+geom_density(fill="lightgreen", color="white")
+##showing normal distribution and plotting the vertical line of sample mean
+g+stat_function(fun = dnorm,args = list(mean = 1/lambda, sd = 1))+geom_vline(xintercept = mean(smean1$smean1), color="blue", size=2)
+
+```
+
+From the plot, we can see the mean of sample mean distribution is merely population mean(1/0.2=5)
+Now we perform t test
+```{r, echo=TRUE}
+t.test(smean1$smean1,lower.tail=F)
+```
+
+95% confidence interval included the population mean, p-value< 2.2e-16, hence it is approximately normal distribution,CLT applied in this case.
+
+###Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution
+
+```{r, echo=TRUE}
+#calculate sample variance and substract population variance and plot the distribution
+svar<-apply(sim1,1,var)
+svar<-data.frame(1:1000, svar)
+g1<-ggplot(svar, aes(x=svar))+geom_histogram(fill="lightblue", color="white")
+g1 +geom_vline(xintercept = (1/lambda)^2, color="blue", size=2)
+
+```
+The distribution still appeared to be a bell shape but more skewed
+
+```{r, echo=TRUE}
+##perfoming 2 headed t.test
+t.test(svar$svar,lower.tail=F)
+```
+
+p value <2.2e-16, for 95% confidence level between 24.82609 and 26.31739, which included population mean
+
+
